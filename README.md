@@ -176,6 +176,14 @@ The included epoch-45 checkpoint was evaluated on the 359-image test split with 
 
 Accuracy is influenced by common water classes. Macro F1 and Mean IoU better reflect performance across rare and common classes. Weighted loss is used to reduce class-imbalance effects, but it does not eliminate the imbalance; some rare classes may still have low recall or IoU.
 
+### Example Prediction
+
+The following test-patch preview compares the original Sentinel-2 image, the ground-truth Marine Debris mask, the U-Net prediction, and the overlay. Red marks indicate Marine Debris. Small detections are enlarged in the preview for visibility only; the reported pixel counts use the original mask values.
+
+![U-Net prediction comparison](docs/unet_comparison.png)
+
+Example patch: `22-12-20_18QYF_0`. The ground truth contains 28 Marine Debris pixels and the model predicts 31 pixels for this patch.
+
 ## Predict One Image
 
 `predict.py` accepts one 11-band Sentinel-2 GeoTIFF and writes a single-band prediction mask:
