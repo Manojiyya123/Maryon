@@ -1,4 +1,4 @@
-# AquaSense: Marine Pollution Detection Using Sentinel-2 Satellite Imagery
+# Maryon : Marine Pollution Detection Using Sentinel-2 Satellite Imagery
 
 ## Overview
 
