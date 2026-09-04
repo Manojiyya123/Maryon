@@ -31,6 +31,10 @@ if __name__ == "__main__":
     roi = str(random_generator.choice(rois))
     image_path, image_name = image_paths(root_path, roi)
     mask_path = os.path.join(root_path, "data", "random_prediction.tif")
+    ground_truth_path = os.path.join(
+        root_path, "data", "patches", image_paths(root_path, roi)[1].rsplit("_", 1)[0],
+        image_name + "_cl.tif"
+    )
     preview_path = os.path.join(root_path, "data", "random_prediction_preview.png")
     script_dir = os.path.dirname(__file__)
     python = sys.executable
@@ -57,6 +61,8 @@ if __name__ == "__main__":
             image_path,
             "--mask_path",
             mask_path,
+            "--ground_truth_path",
+            ground_truth_path,
             "--output_path",
             preview_path,
         ],
