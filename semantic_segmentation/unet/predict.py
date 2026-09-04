@@ -46,7 +46,18 @@ def predict(options):
 
     with torch.no_grad():
         logits = model(image.unsqueeze(0).to(device))
-        predicted_classes = logits.argmax(1).squeeze(0).cpu().numpy() + 1
+        probabilities = torch.softmax(logits, dim=1)
+        predicted_classes = probabilities.argmax(1)
+        if options["debris_threshold"] > 0:
+            debris_probability = probabilities[:, 0]
+            best_non_debris = probabilities[:, 1:].argmax(1) + 1
+            predicted_classes = torch.where(
+                (predicted_classes == 0) &
+                (debris_probability < options["debris_threshold"]),
+                best_non_debris,
+                predicted_classes,
+            )
+        predicted_classes = predicted_classes.squeeze(0).cpu().numpy() + 1
 
     output_path = options["output_path"]
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
@@ -70,4 +81,10 @@ if __name__ == "__main__":
     parser.add_argument("--input_channels", type=int, default=11)
     parser.add_argument("--output_channels", type=int, default=11)
     parser.add_argument("--hidden_channels", type=int, default=16)
+    parser.add_argument(
+        "--debris_threshold",
+        type=float,
+        default=0.0,
+        help="Minimum Marine Debris probability; 0 keeps normal argmax behavior",
+    )
     predict(vars(parser.parse_args()))

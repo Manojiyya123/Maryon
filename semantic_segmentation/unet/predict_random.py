@@ -22,6 +22,7 @@ if __name__ == "__main__":
     parser.add_argument("--split", default="test", choices=["train", "val", "test"])
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--model_path", default="trained_models/45/model.pth")
+    parser.add_argument("--debris_threshold", type=float, default=0.0)
     args = parser.parse_args()
 
     root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../.."))
@@ -50,6 +51,8 @@ if __name__ == "__main__":
             os.path.join(script_dir, args.model_path),
             "--output_path",
             mask_path,
+            "--debris_threshold",
+            str(args.debris_threshold),
         ],
         check=True,
     )

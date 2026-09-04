@@ -102,8 +102,18 @@ def main(options):
             
             probs = torch.nn.functional.softmax(logits, dim=1).cpu().numpy()
             target = target.cpu().numpy()
-            
-            y_predicted += probs.argmax(1).tolist()
+
+            predicted = probs.argmax(1)
+            if options['debris_threshold'] > 0:
+                low_confidence_debris = (
+                    (predicted == 0) &
+                    (probs[:, 0] < options['debris_threshold'])
+                )
+                predicted[low_confidence_debris] = (
+                    probs[low_confidence_debris, 1:].argmax(1) + 1
+                )
+
+            y_predicted += predicted.tolist()
             y_true += target.tolist()
         
         ####################################################################
@@ -179,9 +189,19 @@ def main(options):
                     # Predictions
                     logits = model(image.unsqueeze(0))
             
-                    probs = torch.nn.functional.softmax(logits.detach(), dim=1).cpu().numpy()
-            
-                    probs = probs.argmax(1).squeeze()+1
+                    probs = torch.nn.functional.softmax(logits.detach(), dim=1).cpu().numpy()[0]
+
+                    predicted = probs.argmax(0)
+                    if options['debris_threshold'] > 0:
+                        low_confidence_debris = (
+                            (predicted == 0) &
+                            (probs[0] < options['debris_threshold'])
+                        )
+                        predicted[low_confidence_debris] = (
+                            probs[1:, low_confidence_debris].argmax(0) + 1
+                        )
+
+                    probs = predicted + 1
                     
                     # Write the mask with georeference
                     dst.write_band(1, probs.astype(dtype).copy()) # In order to be in the same dtype
@@ -207,6 +227,7 @@ if __name__ == "__main__":
     # Produce Predicted Masks
     parser.add_argument('--predict_masks', default= True, type=bool, help='Generate test set prediction masks?')
     parser.add_argument('--gen_masks_path', default=os.path.join(root_path, 'data', 'predicted_unet'), help='Path to where to produce store predictions')
+    parser.add_argument('--debris_threshold', default=0.0, type=float, help='Minimum Marine Debris probability; 0 keeps normal argmax behavior')
 
     args = parser.parse_args()
     options = vars(args)  # convert to ordinary dict
