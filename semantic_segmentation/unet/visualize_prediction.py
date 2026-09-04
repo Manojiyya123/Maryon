@@ -5,7 +5,7 @@ import os
 
 import numpy as np
 import rasterio
-from PIL import Image
+from PIL import Image, ImageFilter
 
 
 def stretch_band(band):
@@ -36,10 +36,15 @@ def visualize(options):
         axis=-1,
     )
     debris = mask == 1
+    visible_debris = np.array(
+        Image.fromarray((debris * 255).astype("uint8"), mode="L").filter(
+            ImageFilter.MaxFilter(9)
+        )
+    ) > 0
     overlay = rgb.copy()
-    overlay[debris] = [1.0, 0.0, 0.0]
+    overlay[visible_debris] = [1.0, 0.0, 0.0]
     debris_mask = np.zeros_like(rgb)
-    debris_mask[debris] = [1.0, 0.0, 0.0]
+    debris_mask[visible_debris] = [1.0, 0.0, 0.0]
 
     preview = np.concatenate([rgb, debris_mask, overlay], axis=1)
 
