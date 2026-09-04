@@ -36,9 +36,12 @@ def visualize(options):
         axis=-1,
     )
     debris = mask == 1
-    preview = rgb.copy()
-    preview[debris] = [1.0, 0.0, 0.0]
-    preview[debris] = 0.65 * preview[debris] + 0.35 * np.array([1.0, 0.0, 0.0])
+    overlay = rgb.copy()
+    overlay[debris] = [1.0, 0.0, 0.0]
+    debris_mask = np.zeros_like(rgb)
+    debris_mask[debris] = [1.0, 0.0, 0.0]
+
+    preview = np.concatenate([rgb, debris_mask, overlay], axis=1)
 
     output_path = options["output_path"]
     os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
